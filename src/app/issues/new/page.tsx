@@ -2,22 +2,24 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { Callout, TextArea, Button } from '@radix-ui/themes'
+import { Callout, TextArea, Button, Text } from '@radix-ui/themes'
 import { useForm, Controller } from 'react-hook-form'
 import "easymde/dist/easymde.min.css"
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { createIssueSchema } from '@/app/validationSchema'
+import {z} from 'zod'
+
+type IssueFormData = z.infer<typeof createIssueSchema> ;
 
 const SimpleMDE = dynamic(() => import('react-simplemde-editor'), { ssr: false })
 
-interface IssueFormData {
-    title: string
-    description: string
-}
-
 const NewIssuePage = () => {
     const router = useRouter();
-    const { register, control, handleSubmit } = useForm<IssueFormData>()
+    const { register, control, handleSubmit, formState: {errors} } = useForm<IssueFormData>({
+        resolver: zodResolver(createIssueSchema)
+    })
     const [error, setError] = useState(''); 
 
     return (
@@ -46,7 +48,7 @@ const NewIssuePage = () => {
                     rows={1}
                     className="w-full p-2 border rounded-lg"
                 />
-
+                {errors.title && <Text color="red">{errors.title.message}</Text>}
                 <Controller
                     name="description"
                     control={control}
@@ -58,7 +60,7 @@ const NewIssuePage = () => {
                     />
                     )}
                 />
-
+                {errors.description && <Text color="red" as="p">{errors.description.message}</Text>}
                 <Button className="w-full mt-6 bg-blue-600 text-white hover:bg-blue-700">
                     Submit New Issue
                 </Button>
