@@ -10,7 +10,8 @@ import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createIssueSchema } from '@/app/validationSchema'
 import {z} from 'zod'
-import ErrorMessage  from '../../components/errorMessage'
+import ErrorMessage from '@/app/components/ErrorMessage'
+import { Spinner } from '@/app/components/Spinner'
 
 type IssueFormData = z.infer<typeof createIssueSchema> ;
 
@@ -22,6 +23,7 @@ const NewIssuePage = () => {
         resolver: zodResolver(createIssueSchema)
     })
     const [error, setError] = useState(''); 
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     return (
         <div>
@@ -32,14 +34,17 @@ const NewIssuePage = () => {
             }
             <form
             className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md"
-            onSubmit=
-                {handleSubmit(async (data) => 
-                    await axios.post('/api/issues', data).then(() => {
-                        router.push('/issues');
-                    }).catch((error) => {
-                        setError('An unexpected error occured. Try again later.')
-                    })
-                )}
+            onSubmit={handleSubmit(async (data) => {
+                setIsSubmitting(true);
+                try {
+                await axios.post('/api/issues', data);
+                router.push('/issues');
+                } catch (error) {
+                setError('An unexpected error occurred. Try again later.');
+                } finally {
+                setIsSubmitting(false);
+                }
+            })}
             >
                 <h1 className="text-2xl font-semibold mb-4">Create New Issue</h1>
 
@@ -66,8 +71,10 @@ const NewIssuePage = () => {
                 <ErrorMessage >
                     {errors.description?.message}
                 </ErrorMessage>
-                <Button className="w-full mt-6 bg-blue-600 text-white hover:bg-blue-700">
-                    Submit New Issue
+                <Button className="w-full mt-6 bg-blue-600 text-white hover:bg-blue-700"
+                disabled={isSubmitting}
+                >
+                    Submit New Issue {isSubmitting && <Spinner />}
                 </Button>
             </form>
         </div>
