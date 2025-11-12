@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
-import { TextField, TextArea, Button } from '@radix-ui/themes'
+import { TextArea, Button } from '@radix-ui/themes'
+import SimpleMDE from "react-simplemde-editor"
+import "easymde/dist/easymde.min.css"
 
 const NewIssuePage = () => {
     return (
@@ -12,9 +14,8 @@ const NewIssuePage = () => {
                 rows={1}
                 className="w-full p-2 border rounded-lg"
             />
-            <TextArea 
+            <SimpleMDE 
                 placeholder="Description"
-                rows={6}
                 className="w-full mt-4 p-2 border rounded-lg"
             />
             <Button className='p-5 m-4 justify-items-center'>Submit New Issue</Button>
